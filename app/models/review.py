@@ -11,6 +11,7 @@ class ReviewCreate(BaseModel):
 class ReviewUpdate(BaseModel):
     rating: confloat(ge=0, le=5) = Field(..., description="Rating between 0 and 5") # type: ignore
     comment: Optional[str] = None
+    
 
 class ReviewOut(BaseModel):
     review_id: UUID
@@ -20,6 +21,7 @@ class ReviewOut(BaseModel):
     rating: float
     comment: Optional[str]
     created_at: datetime
+    updated_at: Optional[datetime]
     client_name: str
     client_surname: str
 

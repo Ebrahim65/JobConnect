@@ -1,4 +1,5 @@
 # app/routes/reviews.py
+import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query
 import asyncpg
 from datetime import datetime
@@ -76,6 +77,64 @@ async def create_review(
     review_data = await get_review(str(review_id), conn)
     return ReviewOut(**review_data)
 
+@reviews_router.get("/", response_model=List[ReviewOut])
+async def get_reviews_by_booking(
+    booking_id: str = Query(None, description="Filter by booking ID"),
+    conn: asyncpg.Connection = Depends(get_db)
+):
+    if not booking_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Booking ID parameter is required"
+        )
+
+    reviews = await conn.fetch(
+        """
+        SELECT 
+            r.*,
+            c.name as client_name,
+            c.surname as client_surname
+        FROM review r
+        JOIN client c ON r.client_id = c.client_id
+        WHERE r.booking_id = $1
+        """,
+        booking_id
+    )
+
+    return [dict(review) for review in reviews]
+
+@reviews_router.get("/booking-reviews", response_model=List[ReviewOut])
+async def get_reviews_for_bookings(
+    booking_ids: str = Query(..., description="Comma-separated list of booking IDs"),
+    conn: asyncpg.Connection = Depends(get_db)
+):
+    try:
+        # Convert comma-separated string to list of UUIDs
+        booking_id_list = [uuid.UUID(bid.strip()) for bid in booking_ids.split(',') if bid.strip()]
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid booking ID format"
+        )
+
+    if not booking_id_list:
+        return []
+
+    reviews = await conn.fetch(
+        """
+        SELECT 
+            r.*,
+            c.name as client_name,
+            c.surname as client_surname
+        FROM review r
+        JOIN client c ON r.client_id = c.client_id
+        WHERE r.booking_id = ANY($1::uuid[])
+        """,
+        booking_id_list
+    )
+
+    return [dict(review) for review in reviews]
+
 @reviews_router.get("/{review_id}", response_model=ReviewOut)
 async def get_review_by_id(
     review_id: str,
@@ -101,7 +160,7 @@ async def get_technician_reviews(
         FROM review r
         JOIN client c ON r.client_id = c.client_id
         WHERE r.technician_id = $1
-        ORDER BY r.created_at DESC
+        ORDER BY COALESCE(r.updated_at, r.created_at) DESC
         LIMIT $2 OFFSET $3
         """,
         technician_id, per_page, offset
@@ -205,5 +264,11 @@ async def get_review(review_id: str, conn: asyncpg.Connection) -> dict:
     )
     if not review:
         raise HTTPException(status_code=404, detail="Review not found")
-    return review
+    
+    # Convert asyncpg Record to dict and handle Decimal type for rating
+    review_dict = dict(review)
+    review_dict['rating'] = float(review_dict['rating'])  # Convert Decimal to float
+    return review_dict
+
+
 __all__ = ["reviews_router"]

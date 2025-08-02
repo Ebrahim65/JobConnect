@@ -1,11 +1,16 @@
 from datetime import datetime, timedelta
+import io
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from typing import List
 from uuid import UUID
 import asyncpg
 import logging
+
+#import pdfkit
+from xhtml2pdf import pisa
+from io import BytesIO
 from ..database import get_db
-from ..models.technician import TechnicianDashboard, TechnicianSearchResults, InAppTechnician, TechnicianQualification, TechnicianCertification
+from ..models.technician import BookingLocationStats, TechnicianDashboard, TechnicianDistanceStats, TechnicianSearchResults, InAppTechnician, TechnicianQualification, TechnicianCertification
 from ..utils.external_technicians import get_external_technicians
 from ..utils.haversine import haversine  # Import the haversine function
 from ..utils.auth import get_current_user
@@ -363,17 +368,20 @@ async def add_time_off_entry(
 
 @technicians_router.delete("/me/time-off/{entry_id}")
 async def delete_time_off_entry(
-    entry_id: int,
+    entry_id: UUID,  # Ensure this is typed as UUID
     current_user: dict = Depends(get_current_user),
     conn: asyncpg.Connection = Depends(get_db)
 ):
     if current_user["type"] != "technician":
         raise HTTPException(status_code=403)
     
-    await conn.execute(
+    result = await conn.execute(
         "DELETE FROM technician_schedule WHERE schedule_id = $1 AND technician_id = $2",
         entry_id, current_user["id"]
     )
+    
+    if result == "DELETE 0":
+        raise HTTPException(status_code=404, detail="Time off entry not found")
     
     return {"message": "Time off entry deleted"}
 
@@ -660,7 +668,7 @@ async def reject_booking(
     await conn.execute(
         """
         UPDATE booking 
-        SET status = 'cancelled', updated_at = NOW()
+        SET status = 'rejected', updated_at = NOW()
         WHERE booking_id = $1
         """,
         booking_id
@@ -826,5 +834,350 @@ async def get_technician_detail(
 
     return tech_dict
 
+@technicians_router.get("/me/distance-stats", response_model=TechnicianDistanceStats)
+async def get_technician_distance_stats(
+    current_user: dict = Depends(get_current_user),
+    conn: asyncpg.Connection = Depends(get_db)
+):
+    """
+    Calculate and return the total distance traveled by the authenticated technician 
+    for all completed bookings.
+    """
+    if current_user["type"] != "technician":
+        raise HTTPException(status_code=403, detail="Only technicians can access this endpoint")
+
+    # First get the technician's location
+    technician = await conn.fetchrow(
+        "SELECT technician_id, name, surname, latitude, longitude FROM technician WHERE technician_id = $1",
+        current_user["id"]
+    )
+    
+    if not technician:
+        raise HTTPException(status_code=404, detail="Technician not found")
+
+    # Get all completed bookings for this technician
+    completed_bookings = await conn.fetch(
+        """
+        SELECT 
+            booking_id, 
+            client_latitude, 
+            client_longitude,
+            start_date
+        FROM booking 
+        WHERE technician_id = $1 AND status = 'completed'
+        """,
+        current_user["id"]
+    )
+    
+    total_distance = 0.0
+    booking_distances = []
+    
+    for booking in completed_bookings:
+        if booking['client_latitude'] and booking['client_longitude']:
+            distance = haversine(
+                technician['latitude'], technician['longitude'],
+                booking['client_latitude'], booking['client_longitude']
+            )
+            total_distance += distance
+            booking_distances.append(distance)
+    
+    completed_count = len(completed_bookings)
+    avg_distance = total_distance / completed_count if completed_count > 0 else 0
+    
+    return {
+        "technician_id": technician['technician_id'],
+        "technician_name": technician['name'],
+        "technician_surname": technician['surname'],
+        "total_distance_km": round(total_distance, 2),
+        "completed_bookings_count": completed_count,
+        "average_distance_per_booking_km": round(avg_distance, 2)
+    }
+
+@technicians_router.get("/me/location-stats", response_model=List[BookingLocationStats])
+async def get_booking_location_stats(
+    current_user: dict = Depends(get_current_user),
+    conn: asyncpg.Connection = Depends(get_db)
+):
+    """
+    Return detailed location information for all completed bookings of the authenticated technician
+    """
+    if current_user["type"] != "technician":
+        raise HTTPException(status_code=403, detail="Only technicians can access this endpoint")
+
+    # Get technician's location
+    technician = await conn.fetchrow(
+        "SELECT latitude, longitude FROM technician WHERE technician_id = $1",
+        current_user["id"]
+    )
+    
+    if not technician:
+        raise HTTPException(status_code=404, detail="Technician not found")
+
+    # Get all completed bookings with location data
+    bookings = await conn.fetch(
+        """
+        SELECT 
+            b.booking_id,
+            b.service_type,
+            b.client_latitude,
+            b.client_longitude,
+            b.client_address,
+            b.client_city,
+            b.client_postal_code,
+            b.client_province,
+            b.client_country,
+            b.start_date
+        FROM booking b
+        WHERE b.technician_id = $1 
+          AND b.status = 'completed'
+          AND b.client_latitude IS NOT NULL
+          AND b.client_longitude IS NOT NULL
+        ORDER BY b.start_date DESC
+        """,
+        current_user["id"]
+    )
+    
+    results = []
+    for booking in bookings:
+        distance = haversine(
+            technician['latitude'], technician['longitude'],
+            booking['client_latitude'], booking['client_longitude']
+        )
+        
+        full_address = ", ".join(filter(None, [
+            booking['client_address'],
+            booking['client_city'],
+            booking['client_postal_code'],
+            booking['client_province'],
+            booking['client_country']
+        ]))
+        
+        results.append({
+            "booking_id": booking['booking_id'],
+            "service_type": booking['service_type'],
+            "distance_from_technician_km": round(distance, 2),
+            "client_address": booking['client_address'],
+            "client_city": booking['client_city'],
+            "client_postal_code": booking['client_postal_code'],
+            "client_province": booking['client_province'],
+            "client_country": booking['client_country'],
+            "booking_date": booking['start_date']
+        })
+    
+    return results
+
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
+from datetime import datetime
+
+@technicians_router.get("/me/print-stats", response_class=HTMLResponse)
+async def print_technician_stats(
+    current_user: dict = Depends(get_current_user),
+    conn: asyncpg.Connection = Depends(get_db)
+):
+    """
+    Generate a printable HTML report of the technician's distance and location stats
+    """
+    if current_user["type"] != "technician":
+        raise HTTPException(status_code=403, detail="Only technicians can access this endpoint")
+
+    # Get the summary stats
+    distance_stats = await get_technician_distance_stats(current_user, conn)
+    
+    # Get the detailed location stats
+    location_stats = await get_booking_location_stats(current_user, conn)
+    
+    # Get technician details
+    technician = await conn.fetchrow(
+        "SELECT name, surname, email FROM technician WHERE technician_id = $1",
+        current_user["id"]
+    )
+    
+    # Generate the HTML report with improved styling for PDF generation
+    html_content = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Technician Stats Report</title>
+        <style>
+            @page {{
+                size: A4;
+                margin: 1cm;
+            }}
+            body {{
+                font-family: Arial, sans-serif;
+                line-height: 1.5;
+                margin: 0;
+                padding: 20px;
+                color: #333;
+            }}
+            .header {{
+                text-align: center;
+                margin-bottom: 20px;
+                border-bottom: 2px solid #333;
+                padding-bottom: 10px;
+            }}
+            .summary {{
+                margin-bottom: 20px;
+            }}
+            .summary-table {{
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 15px;
+            }}
+            .summary-table th, .summary-table td {{
+                padding: 8px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }}
+            .details-table {{
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 15px;
+                page-break-inside: avoid;
+            }}
+            .details-table th, .details-table td {{
+                padding: 6px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+                font-size: 12px;
+            }}
+            .details-table th {{
+                background-color: #f2f2f2;
+                font-weight: bold;
+            }}
+            .footer {{
+                margin-top: 20px;
+                text-align: right;
+                font-size: 10px;
+                color: #666;
+            }}
+            h1 {{
+                color: #333;
+                font-size: 24px;
+                margin: 0 0 5px 0;
+            }}
+            h2 {{
+                color: #444;
+                font-size: 18px;
+                margin: 20px 0 10px 0;
+                page-break-after: avoid;
+            }}
+            p {{
+                margin: 5px 0;
+            }}
+            .no-break {{
+                page-break-inside: avoid;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="header no-break">
+            <h1>Technician Service Report</h1>
+            <p><strong>{technician['name']} {technician['surname']}</strong> | {technician['email']}</p>
+            <p>Report generated on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
+        </div>
+        
+        <div class="summary no-break">
+            <h2>Summary Statistics</h2>
+            <table class="summary-table">
+                <tr>
+                    <th>Total Distance Traveled</th>
+                    <td>{distance_stats['total_distance_km']:.2f} km</td>
+                </tr>
+                <tr>
+                    <th>Completed Bookings</th>
+                    <td>{distance_stats['completed_bookings_count']}</td>
+                </tr>
+                <tr>
+                    <th>Average Distance per Booking</th>
+                    <td>{distance_stats['average_distance_per_booking_km']:.2f} km</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="details">
+            <h2>Booking Details</h2>
+            <table class="details-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Service</th>
+                        <th>Distance (km)</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {"".join([
+                        f"""
+                        <tr class="no-break">
+                            <td>{stat['booking_date'].strftime("%Y-%m-%d")}</td>
+                            <td>{stat['service_type']}</td>
+                            <td>{stat['distance_from_technician_km']:.2f}</td>
+                            <td>
+                                {stat['client_address']}, {stat['client_city']}<br>
+                                {stat['client_province']} {stat['client_postal_code']}<br>
+                                {stat['client_country']}
+                            </td>
+                        </tr>
+                        """ for stat in location_stats
+                    ])}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer no-break">
+            <p>End of report</p>
+        </div>
+    </body>
+    </html>
+    """
+    
+    return HTMLResponse(content=html_content)
+
+@technicians_router.get("/me/print-stats/pdf")
+async def print_technician_stats_pdf(
+    current_user: dict = Depends(get_current_user),
+    conn: asyncpg.Connection = Depends(get_db)
+):
+    """
+    Generate a printable PDF report of the technician's distance and location stats
+    using xhtml2pdf/pisa
+    """
+    if current_user["type"] != "technician":
+        raise HTTPException(status_code=403, detail="Only technicians can access this endpoint")
+
+    # Get the HTML content from the HTML endpoint
+    html_response = await print_technician_stats(current_user, conn)
+    html_content = html_response.body.decode('utf-8')
+    
+    # Create a PDF buffer
+    pdf_buffer = BytesIO()
+    
+    # Create PDF using pisa
+    pisa_status = pisa.CreatePDF(
+        html_content,
+        dest=pdf_buffer,
+        encoding='utf-8'
+    )
+    
+    # Check for errors
+    if pisa_status.err:
+        logger.error(f"PDF generation failed: {pisa_status.err}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to generate PDF report"
+        )
+    
+    # Return the PDF file
+    pdf_buffer.seek(0)
+    return StreamingResponse(
+        pdf_buffer,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=technician_distance_report_{datetime.now().strftime('%Y%m%d')}.pdf"
+        }
+    )
 
 __all__ = ["technicians_router"]

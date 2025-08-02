@@ -21,14 +21,21 @@ class PaymentCreate(BaseModel):
     payment_method: PaymentMethod
 
 class PaymentOut(BaseModel):
-    payment_id: str
-    booking_id: str
-    client_id: str
-    technician_id: str
+    payment_id: UUID
+    booking_id: UUID
+    client_id: UUID
+    technician_id: UUID
     amount: float
-    payment_method: PaymentMethod
+    service_type: Optional[str]
+    payment_method: Optional[PaymentMethod]
     payment_status: PaymentStatus
     transaction_date: Optional[datetime]
+
+    class Config:
+        json_encoders = {
+            UUID: lambda v: str(v),
+            datetime: lambda v: v.isoformat()
+        }
 
 class PaymentUpdate(BaseModel):
     payment_status: PaymentStatus

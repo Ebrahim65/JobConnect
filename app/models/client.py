@@ -26,7 +26,6 @@ class ClientUpdate(BaseModel):
     phone_number: Optional[str] = None
     location_name: Optional[str] = None
     profile_picture_url: Optional[str] = None
-    # Removed latitude/longitude since we're not storing them anymore
 
 class FavoriteTechnician(BaseModel):
     technician_id: UUID

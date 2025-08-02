@@ -18,12 +18,16 @@ async def create_schedule(
     if current_user["type"] != "technician":
         raise HTTPException(status_code=403, detail="Only technicians can create schedules")
 
+    # The validator has already ensured these are naive datetimes in UTC
+    start_time = schedule.start_time
+    end_time = schedule.end_time
+
     schedule_id = await conn.fetchval("""
         INSERT INTO technician_schedule (
             technician_id, start_time, end_time, specific_date, day_of_week
         ) VALUES ($1, $2, $3, $4, $5)
         RETURNING schedule_id
-    """, current_user["id"], schedule.start_time, schedule.end_time, schedule.specific_date, schedule.day_of_week)
+    """, current_user["id"], start_time, end_time, schedule.specific_date, schedule.day_of_week)
 
     row = await conn.fetchrow("SELECT * FROM technician_schedule WHERE schedule_id = $1", schedule_id)
     return dict(row)

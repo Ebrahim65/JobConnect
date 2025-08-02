@@ -98,6 +98,43 @@ class TechnicianScheduleIn(BaseModel):
 class TechnicianScheduleOut(TechnicianScheduleIn):
     schedule_id: UUID
 
+# For travel stats
+
+class TechnicianDistanceStats(BaseModel):
+    technician_id: UUID
+    technician_name: str
+    technician_surname: str
+    total_distance_km: float
+    completed_bookings_count: int
+    average_distance_per_booking_km: float
+
+class BookingLocationStats(BaseModel):
+    booking_id: UUID
+    service_type: str
+    distance_from_technician_km: float
+    client_address: str
+    client_city: str
+    client_postal_code: str
+    client_province: str
+    client_country: str
+    booking_date: datetime
+
+class PrintableStats(BaseModel):
+    technician_id: UUID
+    technician_name: str
+    technician_surname: str
+    report_date: datetime
+    total_distance_km: float
+    completed_bookings_count: int
+    average_distance_per_booking_km: float
+    booking_stats: List[BookingLocationStats]
+    
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.strftime("%Y-%m-%d %H:%M:%S"),
+            float: lambda v: round(v, 2)
+        }
+
 __all__ = [
     'BaseTechnician',
     'InAppTechnician',

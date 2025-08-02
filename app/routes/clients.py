@@ -57,7 +57,7 @@ async def get_client_dashboard(
     active_bookings = await conn.fetchval(
         """
         SELECT COUNT(*) FROM booking
-        WHERE client_id = $1 AND status IN ('pending', 'accepted', 'in_progress')
+        WHERE client_id = $1 AND status IN ('pending', 'accepted', 'in_progress', 'confirmed', 'offered')
         """,
         current_user["id"]
     )
@@ -213,7 +213,7 @@ async def cancel_confirmed_booking(
 
     return await get_booking_details(booking_id, current_user, conn)
 
-@clients_router.get("/bookings/{booking_id}", response_model=BookingOut)
+@clients_router.get("/bookings/{booking_id}", response_model=List[dict])
 async def get_booking_details(
     booking_id: UUID,
     current_user: dict = Depends(get_current_user),
@@ -270,7 +270,7 @@ async def respond_to_offer(
     if response.accept:
         # Accept the offer
         await conn.execute(
-            "UPDATE booking SET status = 'confirmed' WHERE booking_id = $1",
+            "UPDATE booking SET status = 'accepted' WHERE booking_id = $1",
             booking_id
         )
         message = "Booking accepted"

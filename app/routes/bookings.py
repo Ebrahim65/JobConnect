@@ -57,13 +57,15 @@ async def create_booking(
             detail="The technician is already booked during this time slot"
         )
 
-    # Create the booking
+    # Create the booking with address information
     booking_id = await conn.fetchval("""
         INSERT INTO booking (
             client_id, technician_id, service_type, 
-            description, status, start_date, end_date
+            description, status, start_date, end_date,
+            client_address, client_city, client_postal_code,
+            client_province, client_country, client_latitude, client_longitude
         )
-        VALUES ($1, $2, $3, $4, 'pending', $5, $6)
+        VALUES ($1, $2, $3, $4, 'pending', $5, $6, $7, $8, $9, $10, $11, $12, $13)
         RETURNING booking_id
     """,
         current_user["id"], 
@@ -71,7 +73,14 @@ async def create_booking(
         booking.service_type,
         booking.description,
         booking.start_date,
-        booking.end_date
+        booking.end_date,
+        booking.client_address,
+        booking.client_city,
+        booking.client_postal_code,
+        booking.client_province,
+        booking.client_country,
+        booking.client_latitude,
+        booking.client_longitude
     )
     
     # Create notification
@@ -79,7 +88,7 @@ async def create_booking(
         INSERT INTO notification (message, recipient_id)
         VALUES ($1, $2)
     """,
-        f"New booking request for {booking.service_type}",
+        f"New booking request for {booking.service_type} at {booking.client_address}",
         booking.technician_id
     )
     
@@ -88,15 +97,58 @@ async def create_booking(
         "SELECT email FROM technician WHERE technician_id = $1", 
         booking.technician_id
     )
-    if tech_info:
+    # TOdo
+    '''if tech_info:
         send_email(
             to_email=tech_info["email"],
             subject="📅 New Booking Request",
-            body=f"You have a new booking request for {booking.service_type}. Please log in to respond."
-        )
+            body=f"""
+            You have a new booking request for {booking.service_type}.
+            
+            Location: 
+            {booking.client_address}
+            {booking.client_city}, {booking.client_province} {booking.client_postal_code}
+            {booking.client_country}
+            
+            Please log in to respond.
+            """
+        )'''
     
     booking_data = await get_booking(str(booking_id), conn)
     return BookingOut(**booking_data)
+
+#  address fields
+async def get_booking(booking_id: str, conn: asyncpg.Connection) -> dict:
+    booking = await conn.fetchrow(
+        """
+        SELECT 
+            b.*,
+            c.name as client_name,
+            c.surname as client_surname,
+            t.name as technician_name,
+            t.surname as technician_surname
+        FROM booking b
+        JOIN client c ON b.client_id = c.client_id
+        JOIN technician t ON b.technician_id = t.technician_id
+        WHERE b.booking_id = $1
+        """,
+        booking_id
+    )
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    booking_dict = dict(booking)
+    booking_dict["booking_id"] = str(booking_dict["booking_id"])
+    booking_dict["client_id"] = str(booking_dict["client_id"])
+    booking_dict["technician_id"] = str(booking_dict["technician_id"])
+    booking_dict["created_at"] = booking_dict["created_at"].isoformat()
+    
+    if booking_dict["start_date"]:
+        booking_dict["start_date"] = booking_dict["start_date"].isoformat()
+    if booking_dict["end_date"]:
+        booking_dict["end_date"] = booking_dict["end_date"].isoformat()
+    
+    return booking_dict
 
 @bookings_router.get("/", response_model=list[BookingOut])
 async def get_bookings(
@@ -180,6 +232,7 @@ async def get_booking_by_id(
     
     return BookingOut(**booking_data)
 
+
 @bookings_router.put("/{booking_id}/status", response_model=BookingOut)
 async def update_booking_status(
     booking_id: str,
@@ -216,6 +269,122 @@ async def update_booking_status(
     
     return await get_booking(booking_id, conn)
 
+@bookings_router.put("/{booking_id}/start", response_model=BookingOut)
+async def start_booking(
+    booking_id: str,
+    current_user: dict = Depends(get_current_user),
+    conn: asyncpg.Connection = Depends(get_db)
+):
+    if current_user["type"] != "technician":
+        raise HTTPException(status_code=403, detail="Only technicians can start bookings")
+
+    # Get booking and verify it belongs to this technician
+    booking = await conn.fetchrow(
+        "SELECT status, technician_id FROM booking WHERE booking_id = $1",
+        booking_id
+    )
+    
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    if str(booking["technician_id"]) != str(current_user["id"]):
+        raise HTTPException(status_code=403, detail="Not your booking")
+    
+    if booking["status"] != "accepted":
+        raise HTTPException(
+            status_code=400,
+            detail="Booking must be in 'accepted' status to start"
+        )
+    
+    # Update status to in_progress
+    await conn.execute(
+        "UPDATE booking SET status = 'in_progress', start_date = NOW() WHERE booking_id = $1",
+        booking_id
+    )
+    
+    # Create notification for client
+    await conn.execute(
+        """
+        INSERT INTO notification (message, recipient_id)
+        VALUES ($1, (
+            SELECT client_id FROM booking WHERE booking_id = $2
+        ))
+        """,
+        "Technician has been dispatched to your location to start working. Please show them all work to be completed.",
+        booking_id
+    )
+    
+    return await get_booking(booking_id, conn)
+
+@bookings_router.put("/{booking_id}/complete", response_model=BookingOut)
+async def complete_booking(
+    booking_id: str,
+    current_user: dict = Depends(get_current_user),
+    conn: asyncpg.Connection = Depends(get_db)
+):
+    if current_user["type"] != "technician":
+        raise HTTPException(status_code=403, detail="Only technicians can complete bookings")
+
+    # Get booking and verify it belongs to this technician
+    booking = await conn.fetchrow(
+        "SELECT status, technician_id, client_id, price FROM booking WHERE booking_id = $1",
+        booking_id
+    )
+    
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    if str(booking["technician_id"]) != str(current_user["id"]):
+        raise HTTPException(status_code=403, detail="Not your booking")
+    
+    if booking["status"] != "in_progress":
+        raise HTTPException(
+            status_code=400,
+            detail="Booking must be in 'in_progress' status to complete"
+        )
+    
+    # Start transaction
+    async with conn.transaction():
+        # Update status to completed and set end date
+        await conn.execute(
+            "UPDATE booking SET status = 'completed', end_date = NOW() WHERE booking_id = $1",
+            booking_id
+        )
+        
+        # Create payment record if price exists
+        if booking["price"]:
+            await conn.execute(
+                """
+                INSERT INTO payment (
+                    booking_id,
+                    client_id,
+                    technician_id,
+                    amount,
+                    payment_status,
+                    transaction_date
+                )
+                VALUES ($1, $2, $3, $4, 'pending', NOW())
+                """,
+                booking_id,
+                booking["client_id"],
+                booking["technician_id"],
+                booking["price"]
+            )
+        
+        # Create notification for client
+        await conn.execute(
+            """
+            INSERT INTO notification (message, recipient_id)
+            VALUES ($1, (
+                SELECT client_id FROM booking WHERE booking_id = $2
+            ))
+            """,
+            "Your technician has completed the job",
+            booking_id
+        )
+    
+    return await get_booking(booking_id, conn)
+
 async def get_booking(booking_id: str, conn: asyncpg.Connection) -> dict:
     booking = await conn.fetchrow(
         """
@@ -235,7 +404,6 @@ async def get_booking(booking_id: str, conn: asyncpg.Connection) -> dict:
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
     
-    # Convert asyncpg Record to dict and handle type conversions
     booking_dict = dict(booking)
     booking_dict["booking_id"] = str(booking_dict["booking_id"])
     booking_dict["client_id"] = str(booking_dict["client_id"])
@@ -260,16 +428,7 @@ async def get_recent_client_bookings(
     rows = await conn.fetch(
         """
         SELECT 
-            b.booking_id,
-            b.client_id,
-            b.technician_id,
-            b.service_type,
-            b.description,
-            b.price,
-            b.status,
-            b.start_date,
-            b.end_date,
-            b.created_at,
+            b.*,
             c.name as client_name,
             c.surname as client_surname,
             t.name as technician_name,
@@ -313,15 +472,15 @@ async def get_payable_bookings(
         SELECT 
             b.booking_id, b.service_type, b.description, b.status, b.price,
             b.created_at, b.start_date, b.end_date,
-            t.technician_id, t.name as technician_name, t.surname as technician_surname
+            t.technician_id, t.name as technician_name, t.surname as technician_surname,
+            b.client_address, b.client_city, b.client_postal_code,
+            b.client_province, b.client_country, b.client_latitude, b.client_longitude
         FROM booking b
         JOIN technician t ON b.technician_id = t.technician_id
+        JOIN payment p ON p.booking_id = b.booking_id
         WHERE b.client_id = $1 
         AND b.status = 'completed'
-        AND NOT EXISTS (
-            SELECT 1 FROM payment p 
-            WHERE p.booking_id = b.booking_id
-        )
+        AND p.payment_status = 'pending'
         ORDER BY b.created_at DESC
         """,
         current_user["id"]
@@ -331,7 +490,21 @@ async def get_payable_bookings(
         return []
     
     # Convert to list of dicts and format the data
-    return [BookingPayment(**booking) for booking in bookings]
+    formatted_bookings = []
+    for booking in bookings:
+        booking_dict = dict(booking)
+        booking_dict["booking_id"] = str(booking_dict["booking_id"])
+        booking_dict["technician_id"] = str(booking_dict["technician_id"])
+        booking_dict["created_at"] = booking_dict["created_at"].isoformat()
+        
+        if booking_dict["start_date"]:
+            booking_dict["start_date"] = booking_dict["start_date"].isoformat()
+        if booking_dict["end_date"]:
+            booking_dict["end_date"] = booking_dict["end_date"].isoformat()
+        
+        formatted_bookings.append(BookingPayment(**booking_dict))
+    
+    return formatted_bookings
 
 def format_booking_response(booking):
     """Helper function to format booking response"""

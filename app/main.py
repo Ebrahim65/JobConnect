@@ -14,7 +14,7 @@ app = FastAPI(title="JobConnect API", version="1.0.0")
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://job-connect-app.netlify.app/"],
+    allow_origins=["http://10.2.43.224:3000", "http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

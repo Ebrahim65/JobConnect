@@ -22,4 +22,4 @@ class TechnicianClassifier:
             for keyword in keywords:
                 if keyword in desc_lower:
                     return service_type
-        return "technician"  # fallback generic type
+        return "general technician"  # fallback generic type
