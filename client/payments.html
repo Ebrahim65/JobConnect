@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobConnect - My Payments</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/payments.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar (reuse your existing sidebar) -->
+        <div class="sidebar">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="logo">
+                        <a href="/client/dashboard.html">JobConnect</a>
+                    </div>
+                    <div class="user-profile">
+                        <img src="" alt="Profile Picture" id="profilePicture">
+                        <div class="user-info">
+                            <span id="userName">Loading...</span>
+                            <span class="user-role">Client</span>
+                        </div>
+                    </div>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li class="active">
+                            <a href="/client/dashboard.html">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/client/search.html">
+                                <i class="fas fa-search"></i>
+                                <span>Find Technicians</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/client/bookings.html">
+                                <i class="fas fa-calendar-check"></i>
+                                <span>My Bookings</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/client/favorites.html">
+                                <i class="fas fa-heart"></i>
+                                <span>Favorites</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/client/payments.html">
+                                <i class="fas fa-credit-card"></i>
+                                <span>Payments</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/client/notifications.html">
+                                <i class="fas fa-bell"></i>
+                                <span>Notifications</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/client/settings.html">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <a href="/index.html" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="page-header">
+                <h1><i class="fas fa-credit-card"></i> Payment History</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="loadPayments()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <div class="section-header">
+                    <h2>Pending Payments</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Service</th>
+                                <th>Technician</th>
+                                <th>Amount</th>
+                                <th>Due Date</th>
+                                <th>Booking Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingPayments">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <div class="section-header">
+                    <h2>Payment History</h2>
+                    <div class="filter-controls">
+                        <select id="historyFilter" onchange="loadPaymentHistory()">
+                            <option value="all">All Payments</option>
+                            <option value="last_month">Last 30 Days</option>
+                            <option value="last_quarter">Last 90 Days</option>
+                            <option value="year">This Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Payment ID</th>
+                                <th>Date</th>
+                                <th>Booking ID</th>
+                                <th>Service</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Receipt</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentHistory">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closePaymentModal()">&times;</span>
+            <div id="paymentModalBody"></div>
+        </div>
+    </div>
+
+    <script src="js/payments.js"></script>
+
+</body>
+
+</html>

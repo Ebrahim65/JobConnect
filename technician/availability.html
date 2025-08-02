@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobConnect - My Availability</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/availability.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <a href="/technician/dashboard.html">JobConnect</a>
+                </div>
+                <div class="user-profile">
+                    <img src="" alt="Profile Picture" id="profilePicture">
+                    <div class="user-info">
+                        <span id="userName">Loading...</span>
+                        <span class="user-role">Technician</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="/technician/dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/jobs.html">
+                            <i class="fas fa-briefcase"></i>
+                            <span>My Jobs</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/schedule.html">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Schedule</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/availability.html">
+                            <i class="fas fa-clock"></i>
+                            <span>Availability</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/services.html">
+                            <i class="fas fa-tools"></i>
+                            <span>Services</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/payments.html">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>Income</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/reviews.html">
+                            <i class="fas fa-star"></i>
+                            <span>Reviews</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/notifications.html">
+                            <i class="fas fa-bell"></i>
+                            <span>Notifications</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="/index.html" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1>My Availability</h1>
+                    <div class="breadcrumb">Home / Availability</div>
+                </div>
+                <div class="header-right">
+                    <div class="notification-container">
+                        <div class="notification-icon" onclick="toggleNotifications()">
+                            <i class="fas fa-bell"></i>
+                            <span id="unreadCount" class="badge">0</span>
+                        </div>
+                        <div class="notification-dropdown">
+                            <div class="notification-header">
+                                <h4>Notifications</h4>
+                                <div class="notification-actions">
+                                    <select id="notificationFilter" onchange="filterNotifications()">
+                                        <option value="all">All</option>
+                                        <option value="unread">Unread</option>
+                                        <option value="read">Read</option>
+                                    </select>
+                                    <button onclick="markAllAsRead()" title="Mark all as read">
+                                        <i class="fas fa-check-double"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="notification-list" id="notificationList">
+                                <!-- Notifications will be loaded here -->
+                            </div>
+                            <div class="notification-footer">
+                                <button onclick="viewAllNotifications()">View All Notifications</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <section class="availability-section">
+                <div class="section-header">
+                    <h2>Availability Settings</h2>
+                </div>
+
+                <div class="availability-container">
+                    <!-- Current Availability Status -->
+                    <div class="availability-status">
+                        <h3>Current Availability</h3>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="availabilityToggle" class="toggle-input">
+                            <label for="availabilityToggle" class="toggle-label">
+                                <span class="toggle-handle"></span>
+                                <span class="toggle-text" id="toggleText">Available</span>
+                            </label>
+                        </div>
+                        <p class="status-description" id="statusDescription">
+                            You are currently accepting new bookings.
+                        </p>
+                    </div>
+
+                    <!-- Working Hours -->
+                    <div class="working-hours">
+                        <h3>Working Hours</h3>
+                        <p>Set your regular working hours when you're available for bookings.</p>
+
+                        <div class="hours-grid">
+                            <div class="day-hours" data-day="monday">
+                                <div class="day">Monday</div>
+                                <div class="time-slots">
+                                    <select class="time-select start-time">
+                                        <option value="08:00">8:00 AM</option>
+                                        <!-- More options would be generated by JS -->
+                                    </select>
+                                    <span>to</span>
+                                    <select class="time-select end-time">
+                                        <option value="17:00">5:00 PM</option>
+                                        <!-- More options would be generated by JS -->
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- Repeat for each day (tuesday through sunday) -->
+                            <div class="day-hours" data-day="tuesday">
+                                <div class="day">Tuesday</div>
+                                <div class="time-slots">
+                                    <select class="time-select start-time">
+                                        <option value="08:00">8:00 AM</option>
+                                    </select>
+                                    <span>to</span>
+                                    <select class="time-select end-time">
+                                        <option value="17:00">5:00 PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="day-hours" data-day="wednesday">
+                                <div class="day">Wednesday</div>
+                                <div class="time-slots">
+                                    <select class="time-select start-time">
+                                        <option value="08:00">8:00 AM</option>
+                                    </select>
+                                    <span>to</span>
+                                    <select class="time-select end-time">
+                                        <option value="17:00">5:00 PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="day-hours" data-day="thursday">
+                                <div class="day">Thursday</div>
+                                <div class="time-slots">
+                                    <select class="time-select start-time">
+                                        <option value="08:00">8:00 AM</option>
+                                    </select>
+                                    <span>to</span>
+                                    <select class="time-select end-time">
+                                        <option value="17:00">5:00 PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="day-hours" data-day="friday">
+                                <div class="day">Friday</div>
+                                <div class="time-slots">
+                                    <select class="time-select start-time">
+                                        <option value="08:00">8:00 AM</option>
+                                    </select>
+                                    <span>to</span>
+                                    <select class="time-select end-time">
+                                        <option value="17:00">5:00 PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="day-hours" data-day="saturday">
+                                <div class="day">Saturday</div>
+                                <div class="time-slots">
+                                    <select class="time-select start-time">
+                                        <option value="08:00">8:00 AM</option>
+                                    </select>
+                                    <span>to</span>
+                                    <select class="time-select end-time">
+                                        <option value="17:00">5:00 PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="day-hours" data-day="sunday">
+                                <div class="day">Sunday</div>
+                                <div class="time-slots">
+                                    <select class="time-select start-time">
+                                        <option value="08:00">8:00 AM</option>
+                                    </select>
+                                    <span>to</span>
+                                    <select class="time-select end-time">
+                                        <option value="17:00">5:00 PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" id="saveHoursBtn">
+                            <i class="fas fa-save"></i> Save Working Hours
+                        </button>
+                    </div>
+
+                    <!-- Time Off -->
+                    <div class="time-off">
+                        <h3>Scheduled Time Off</h3>
+                        <p>Add dates when you won't be available for bookings.</p>
+
+                        <div class="time-off-form">
+                            <div class="form-group">
+                                <label for="timeOffStart">Start Date</label>
+                                <input type="date" id="timeOffStart" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="timeOffEnd">End Date</label>
+                                <input type="date" id="timeOffEnd" class="form-control">
+                            </div>
+                            <button class="btn btn-primary" id="addTimeOffBtn">
+                                <i class="fas fa-plus"></i> Add Time Off
+                            </button>
+                        </div>
+
+                        <div class="time-off-list" id="timeOffList">
+                            <!-- Time off entries will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/technician-availability.js"></script>
+</body>
+
+</html>

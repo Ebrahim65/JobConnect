@@ -1,0 +1,9 @@
+.sidebar-nav li.active a {
+    color: var(--primary-color);
+    background-color: var(--primary-light);
+    border-left: 3px solid var(--primary-color);
+}
+
+.sidebar-nav li.active a i {
+    color: var(--primary-color);
+}

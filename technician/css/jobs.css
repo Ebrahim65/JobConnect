@@ -1,0 +1,360 @@
+/* Jobs Page Styles */
+.jobs-container {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.jobs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.jobs-header h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: #333;
+}
+
+.jobs-filter {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.jobs-filter select {
+    padding: 8px 15px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background-color: white;
+    font-size: 0.9rem;
+}
+
+.jobs-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.jobs-table th {
+    text-align: left;
+    padding: 12px 15px;
+    background-color: #f5f5f5;
+    font-weight: 500;
+    color: #555;
+}
+
+.jobs-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.empty-jobs {
+    text-align: center;
+    padding: 30px;
+    color: #777;
+}
+
+.empty-jobs i {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    display: block;
+    color: #ccc;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.status-pending {
+    background-color: #fff8e6;
+    color: #FFC107;
+}
+
+.status-offered {
+    background-color: #e3f2fd;
+    color: #2196F3;
+}
+
+.status-confirmed {
+    background-color: #e3f7e8;
+    color: #4CAF50;
+}
+
+.status-in_progress {
+    background-color: #fff3e0;
+    color: #FF9800;
+}
+
+.status-completed {
+    background-color: #e8f5e9;
+    color: #2E7D32;
+}
+
+.status-cancelled,
+.status-rejected {
+    background-color: #ffebee;
+    color: #C62828;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-right: 5px;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: #2196F3;
+    color: white;
+}
+
+.btn-success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #F44336;
+    color: white;
+}
+
+.btn-whatsapp {
+    background-color: #25D366;
+    color: white;
+}
+
+.action-btn:hover {
+    opacity: 0.9;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #777;
+}
+
+.job-details {
+    margin-bottom: 20px;
+}
+
+.job-details p {
+    margin: 0 0 10px 0;
+    line-height: 1.5;
+}
+
+.job-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.job-actions .btn {
+    padding: 8px 15px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    opacity: 0.9;
+}
+
+/* Distance Stats Section */
+.stats-section {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.stats-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.stats-container {
+    padding: 20px;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+}
+
+.loading-stats {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 6px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.stat-card h3 {
+    margin-top: 0;
+    color: #555;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.stat-card .stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 10px 0;
+    color: #333;
+}
+
+.stat-card .stat-unit {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.bookings-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.bookings-table th {
+    text-align: left;
+    padding: 10px;
+    background-color: #f5f5f5;
+    font-weight: 500;
+}
+
+.bookings-table td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.distance-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    background-color: #e3f2fd;
+    color: #1976d2;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.map-container {
+    margin-top: 15px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border: 1px solid #eee;
+}
+
+.location-section {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.location-section h3 {
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .jobs-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .jobs-filter {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .jobs-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .action-btn {
+        margin-bottom: 5px;
+    }
+}

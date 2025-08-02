@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobConnect - Settings</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/settings.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <a href="/technician/dashboard.html">JobConnect</a>
+                </div>
+                <div class="user-profile">
+                    <img src="" alt="Profile Picture" id="profilePicture">
+                    <div class="user-info">
+                        <span id="userName">Loading...</span>
+                        <span class="user-role">Technician</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="/technician/dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/jobs.html">
+                            <i class="fas fa-briefcase"></i>
+                            <span>My Jobs</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/schedule.html">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Schedule</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/availability.html">
+                            <i class="fas fa-clock"></i>
+                            <span>Availability</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/services.html">
+                            <i class="fas fa-tools"></i>
+                            <span>Services</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/payments.html">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>Income</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/reviews.html">
+                            <i class="fas fa-star"></i>
+                            <span>Reviews</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/notifications.html">
+                            <i class="fas fa-bell"></i>
+                            <span>Notifications</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="/technician/settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="/index.html" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1>Settings</h1>
+                    <div class="breadcrumb">Home / Settings</div>
+                </div>
+                <div class="header-right">
+                    <div class="notification-container">
+                        <div class="notification-icon" onclick="toggleNotifications()">
+                            <i class="fas fa-bell"></i>
+                            <span id="unreadCount" class="badge">0</span>
+                        </div>
+                        <div class="notification-dropdown">
+                            <div class="notification-header">
+                                <h4>Notifications</h4>
+                                <div class="notification-actions">
+                                    <select id="notificationFilter" onchange="filterNotifications()">
+                                        <option value="all">All</option>
+                                        <option value="unread">Unread</option>
+                                        <option value="read">Read</option>
+                                    </select>
+                                    <button onclick="markAllAsRead()" title="Mark all as read">
+                                        <i class="fas fa-check-double"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="notification-list" id="notificationList">
+                                <!-- Notifications will be loaded here -->
+                            </div>
+                            <div class="notification-footer">
+                                <button onclick="viewAllNotifications()">View All Notifications</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Settings Content -->
+            <section class="settings-section">
+                <div class="settings-tabs">
+                    <button class="tab-btn active" onclick="openTab('profile')">Profile</button>
+                    <button class="tab-btn" onclick="openTab('services')">Services</button>
+                    <button class="tab-btn" onclick="openTab('availability')">Availability</button>
+                    <button class="tab-btn" onclick="openTab('payment')">Payment</button>
+                    <button class="tab-btn" onclick="openTab('security')">Security</button>
+                </div>
+                
+                <!-- Profile Tab -->
+                <div id="profile" class="tab-content active">
+                    <h2>Profile Information</h2>
+                    <form id="profileForm">
+                        <div class="form-group profile-picture">
+                            <label>Profile Picture</label>
+                            <div class="profile-picture-container">
+                                <img id="profilePicturePreview" src="" alt="Profile Picture">
+                                <div class="upload-actions">
+                                    <input type="file" id="profilePictureUpload" accept="image/*" style="display: none;">
+                                    <button type="button" class="btn-upload" onclick="document.getElementById('profilePictureUpload').click()">
+                                        <i class="fas fa-upload"></i> Upload Photo
+                                    </button>
+                                    <button type="button" class="btn-remove" id="removeProfilePicture">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName">First Name</label>
+                                <input type="text" id="firstName" name="firstName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last Name</label>
+                                <input type="text" id="lastName" name="lastName" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <input type="text" id="location" name="location" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="about">About Me</label>
+                            <textarea id="about" name="about" rows="4"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="experience">Average years of Experience</label>
+                            <input type="number" id="experience" name="experience" min="0" step="0.5">
+                        </div>
+                        
+                        <button type="submit" class="btn-save">Save Changes</button>
+                    </form>
+                </div>
+                
+                <!-- Services Tab -->
+                <div id="services" class="tab-content">
+                    <h2>My Services</h2>
+                    <div class="services-list" id="servicesList">
+                        <!-- Services will be loaded here -->
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading services...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="add-service">
+                        <h3>Add New Service</h3>
+                        <form id="addServiceForm">
+                            <div class="form-group">
+                                <label for="newService">Service Name</label>
+                                <input type="text" id="newService" name="newService" required>
+                            </div>
+                            <button type="submit" class="btn-add">Add Service</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Availability Tab -->
+                <div id="availability" class="tab-content">
+                    <h2>Working Hours</h2>
+                    <form id="workingHoursForm">
+                        <div class="day-schedule">
+                            <div class="day-row">
+                                <label>Monday</label>
+                                <input type="time" id="mondayStart" name="mondayStart">
+                                <span>to</span>
+                                <input type="time" id="mondayEnd" name="mondayEnd">
+                            </div>
+                            <div class="day-row">
+                                <label>Tuesday</label>
+                                <input type="time" id="tuesdayStart" name="tuesdayStart">
+                                <span>to</span>
+                                <input type="time" id="tuesdayEnd" name="tuesdayEnd">
+                            </div>
+                            <div class="day-row">
+                                <label>Wednesday</label>
+                                <input type="time" id="wednesdayStart" name="wednesdayStart">
+                                <span>to</span>
+                                <input type="time" id="wednesdayEnd" name="wednesdayEnd">
+                            </div>
+                            <div class="day-row">
+                                <label>Thursday</label>
+                                <input type="time" id="thursdayStart" name="thursdayStart">
+                                <span>to</span>
+                                <input type="time" id="thursdayEnd" name="thursdayEnd">
+                            </div>
+                            <div class="day-row">
+                                <label>Friday</label>
+                                <input type="time" id="fridayStart" name="fridayStart">
+                                <span>to</span>
+                                <input type="time" id="fridayEnd" name="fridayEnd">
+                            </div>
+                            <div class="day-row">
+                                <label>Saturday</label>
+                                <input type="time" id="saturdayStart" name="saturdayStart">
+                                <span>to</span>
+                                <input type="time" id="saturdayEnd" name="saturdayEnd">
+                            </div>
+                            <div class="day-row">
+                                <label>Sunday</label>
+                                <input type="time" id="sundayStart" name="sundayStart">
+                                <span>to</span>
+                                <input type="time" id="sundayEnd" name="sundayEnd">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="isAvailable" name="isAvailable">
+                                Currently Available for New Jobs
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn-save">Save Availability</button>
+                    </form>
+                    
+                    <div class="time-off-section">
+                        <h2>Time Off</h2>
+                        <form id="timeOffForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="timeOffStart">Start Date</label>
+                                    <input type="date" id="timeOffStart" name="timeOffStart" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="timeOffEnd">End Date</label>
+                                    <input type="date" id="timeOffEnd" name="timeOffEnd" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-add">Add Time Off</button>
+                        </form>
+                        
+                        <div class="time-off-list" id="timeOffList">
+                            <!-- Time off entries will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Payment Tab -->
+                <div id="payment" class="tab-content">
+                    <h2>Payment Settings</h2>
+                    <form id="paymentForm">
+                        <div class="form-group">
+                            <label for="paymentMethod">Payment Method</label>
+                            <select id="paymentMethod" name="paymentMethod" required>
+                                <option value="">Select Payment Method</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="paypal">PayPal</option>
+                                <option value="cash">Cash</option>
+                            </select>
+                        </div>
+                        
+                        <div id="bankDetails" class="payment-details">
+                            <div class="form-group">
+                                <label for="bankName">Bank Name</label>
+                                <input type="text" id="bankName" name="bankName">
+                            </div>
+                            <div class="form-group">
+                                <label for="accountName">Account Name</label>
+                                <input type="text" id="accountName" name="accountName">
+                            </div>
+                            <div class="form-group">
+                                <label for="accountNumber">Account Number</label>
+                                <input type="text" id="accountNumber" name="accountNumber">
+                            </div>
+                            <div class="form-group">
+                                <label for="branchCode">Branch Code</label>
+                                <input type="text" id="branchCode" name="branchCode">
+                            </div>
+                        </div>
+                        
+                        <div id="paypalDetails" class="payment-details" style="display: none;">
+                            <div class="form-group">
+                                <label for="paypalEmail">PayPal Email</label>
+                                <input type="email" id="paypalEmail" name="paypalEmail">
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn-save">Save Payment Settings</button>
+                    </form>
+                </div>
+                
+                <!-- Security Tab -->
+                <div id="security" class="tab-content">
+                    <h2>Security Settings</h2>
+                    <form id="changePasswordForm">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <input type="password" id="currentPassword" name="currentPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" name="newPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm New Password</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required>
+                        </div>
+                        <button type="submit" class="btn-save">Change Password</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/technician-settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobConnect - Income Analytics</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/payments.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <a href="/technician/dashboard.html">JobConnect</a>
+                </div>
+                <div class="user-profile">
+                    <img src="" alt="Profile Picture" id="profilePicture">
+                    <div class="user-info">
+                        <span id="userName">Loading...</span>
+                        <span class="user-role">Technician</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="/technician/dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/jobs.html">
+                            <i class="fas fa-briefcase"></i>
+                            <span>My Jobs</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/schedule.html">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Schedule</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/availability.html">
+                            <i class="fas fa-clock"></i>
+                            <span>Availability</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/services.html">
+                            <i class="fas fa-tools"></i>
+                            <span>Services</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="/technician/payments.html">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>Income</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/reviews.html">
+                            <i class="fas fa-star"></i>
+                            <span>Reviews</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/notifications.html">
+                            <i class="fas fa-bell"></i>
+                            <span>Notifications</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/technician/settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="/index.html" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1>Income Analytics</h1>
+                    <div class="breadcrumb">Home / Income</div>
+                </div>
+                <div class="header-right">
+                    <div class="notification-container">
+                        <div class="notification-icon" onclick="toggleNotifications()">
+                            <i class="fas fa-bell"></i>
+                            <span id="unreadCount" class="badge">0</span>
+                        </div>
+                        <div class="notification-dropdown">
+                            <div class="notification-header">
+                                <h4>Notifications</h4>
+                                <div class="notification-actions">
+                                    <select id="notificationFilter" onchange="filterNotifications()">
+                                        <option value="all">All</option>
+                                        <option value="unread">Unread</option>
+                                        <option value="read">Read</option>
+                                    </select>
+                                    <button onclick="markAllAsRead()" title="Mark all as read">
+                                        <i class="fas fa-check-double"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="notification-list" id="notificationList">
+                                <!-- Notifications will be loaded here -->
+                            </div>
+                            <div class="notification-footer">
+                                <button onclick="viewAllNotifications()">View All Notifications</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <section class="income-section">
+                <div class="income-overview">
+                    <div class="income-card total-income">
+                        <div class="income-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="income-details">
+                            <h3>Total Income</h3>
+                            <div class="income-amount" id="totalIncome">R0.00</div>
+                            <div class="income-subtext">All time earnings</div>
+                        </div>
+                    </div>
+
+                    <div class="income-card completed-income">
+                        <div class="income-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="income-details">
+                            <h3>Completed</h3>
+                            <div class="income-amount" id="completedIncome">R0.00</div>
+                            <div class="income-subtext">Successfully processed</div>
+                        </div>
+                    </div>
+
+                    <div class="income-card pending-income">
+                        <div class="income-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="income-details">
+                            <h3>Pending</h3>
+                            <div class="income-amount" id="pendingIncome">R0.00</div>
+                            <div class="income-subtext">Awaiting processing</div>
+                        </div>
+                    </div>
+
+                    <div class="income-card failed-income">
+                        <div class="income-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="income-details">
+                            <h3>Failed</h3>
+                            <div class="income-amount" id="failedIncome">R0.00</div>
+                            <div class="income-subtext">Unsuccessful payments</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="income-filters">
+                    <div class="date-range-filter">
+                        <h3>Filter by Date Range</h3>
+                        <div class="date-inputs">
+                            <input type="date" id="startDate" class="date-input">
+                            <span>to</span>
+                            <input type="date" id="endDate" class="date-input">
+                            <button id="applyDateFilter" class="filter-btn">Apply</button>
+                            <button id="resetDateFilter" class="filter-btn outline">Reset</button>
+                        </div>
+                    </div>
+                    <div class="export-actions">
+                        <button id="exportCSV" class="export-btn">
+                            <i class="fas fa-file-csv"></i> Export CSV
+                        </button>
+                        <button id="exportPDF" class="export-btn">
+                            <i class="fas fa-file-pdf"></i> Export PDF
+                        </button>
+                    </div>
+                </div>
+
+                <div class="income-charts">
+                    <div class="chart-container">
+                        <h3>Income Distribution</h3>
+                        <canvas id="incomeDistributionChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Payment Status</h3>
+                        <canvas id="paymentStatusChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="transactions-section">
+                    <h3>Transaction History</h3>
+                    <div class="transactions-table-container">
+                        <table class="transactions-table" id="transactionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Job ID</th>
+                                    <th>Client</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Transactions will be loaded here -->
+                            </tbody>
+                        </table>
+                        <div class="table-loading" id="transactionsLoading">
+                            <i class="fas fa-spinner fa-spin"></i> Loading transactions...
+                        </div>
+                        <div class="table-empty" id="transactionsEmpty">
+                            No transactions found for the selected period
+                        </div>
+                    </div>
+                    <div class="table-pagination" id="transactionsPagination">
+                        <!-- Pagination will be added here -->
+                    </div>
+                </div>
+
+                <div class="income-details">
+                    <div class="details-card">
+                        <h3>Payment Summary</h3>
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Total Payments</span>
+                                <span class="detail-value" id="totalPayments">0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">First Payment</span>
+                                <span class="detail-value" id="firstPaymentDate">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Last Payment</span>
+                                <span class="detail-value" id="lastPaymentDate">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Refunded</span>
+                                <span class="detail-value" id="refundedIncome">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/technician-payments.js"></script>
+    <!-- Add these before your chart initialization code -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+</body>
+
+</html>

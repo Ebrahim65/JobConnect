@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobConnect - Hire Skilled Technicians or Find Technical Jobs</title>
+    <link rel="stylesheet" href="styling/home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+
+<body>
+    <!-- Signup Modal -->
+    <div class="modal" id="signupModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Join JobConnect</h2>
+            <p>Find skilled technicians or quality work opportunities</p>
+
+            <div class="user-type-selection">
+                <div class="user-type-card" id="clientCard">
+                    <i class="fas fa-briefcase"></i>
+                    <h3>I'm a Client</h3>
+                    <p>Looking to hire technicians for my projects</p>
+                </div>
+
+                <div class="user-type-card" id="technicianCard">
+                    <i class="fas fa-tools"></i>
+                    <h3>I'm a Technician</h3>
+                    <p>Looking for work opportunities</p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <p>Already have an account? <a href="#" class="login-link">Log In</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Log in to JobConnect</h2>
+            <p>Welcome back! Please enter your details.</p>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                    <div class="password-toggle">
+                        <i class="fas fa-eye" id="togglePassword"></i>
+                    </div>
+                </div>
+
+                <div class="form-footer">
+                    <div class="remember-me">
+                        <input type="checkbox" id="rememberMe" name="rememberMe">
+                        <label for="rememberMe">Remember me</label>
+                    </div>
+                    <a href="/forgot-password" class="forgot-password">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-login-submit">Log In</button>
+
+                <div class="login-error" id="loginError"></div>
+            </form>
+
+            <div class="modal-footer">
+                <p>Don't have an account? <a href="#" class="signup-link">Sign up</a></p>
+            </div>
+        </div>
+    </div>
+
+    <header class="header">
+        <div class="container">
+            <div id="logo" class="logo">
+                <a href="#">JobConnect</a>
+            </div>
+            <nav class="main-nav">
+                <ul class="nav-list">
+                    <li><a href="#" id="headSignupT">Find Work</a></li>
+                    <li><a href="#" id="headSignupC">Find Technicians</a></li>
+                    <li><a href="#">Why JobConnect</a></li>
+                    <li><a href="#">Resources</a></li>
+                </ul>
+                <ul class="auth-buttons">
+                    <li><a href="#" class="btn-login">Log In</a></li>
+                    <li><a href="#" class="btn-signup" id="headerSignup">Sign Up</a></li>
+                </ul>
+            </nav>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Welcome to JobConnect, your one-stop service connector</h1>
+                    <p class="subheading">
+                        Search, book, and establish connections with skilled technicians.
+                        Big or small, messy or delicate. We've got you covered.
+                    </p>
+                    <div class="cta-buttons">
+                        <a href="#" class="btn-primary" id="heroSignup">Get Started</a>
+                        <a href="#" class="btn-secondary">Learn More</a>
+                    </div>
+                    <div class="trust-badges">
+                        <div class="rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span>4.8/5 from 12,345+ reviews</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80"
+                        alt="Technicians at work">
+                </div>
+            </div>
+        </section>
+        <!-- Stats Section -->
+        <section class="stats-section">
+            <div class="container">
+                <h2>Our Top Technicians</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Top Rated</h3>
+                        <div class="technicians-list" id="topRatedTechnicians">
+                            <!-- Will be populated by JavaScript -->
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Most Liked</h3>
+                        <div class="technicians-list" id="mostLikedTechnicians">
+                            <!-- Will be populated by JavaScript -->
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>For Clients</h4>
+                    <ul>
+                        <li><a href="#">How to Hire</a></li>
+                        <li><a href="#">Pricing</a></li>
+                        <li><a href="#">Client Reviews</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>For Technicians</h4>
+                    <ul>
+                        <li><a href="#">How to Find Work</a></li>
+                        <li><a href="#">Getting Paid</a></li>
+                        <li><a href="#">Technician Resources</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Follow Us</h4>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 JobConnect. All rights reserved.</p>
+                <div class="legal-links">
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="styling/script.js"></script>
+</body>
+
+</html>

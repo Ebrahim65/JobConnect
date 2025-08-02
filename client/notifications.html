@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Notifications</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/notifications.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <a href="/client/dashboard.html">JobConnect</a>
+                </div>
+                <div class="user-profile">
+                    <img src="" alt="Profile Picture" id="profilePicture">
+                    <div class="user-info">
+                        <span id="userName">Loading...</span>
+                        <span class="user-role">Client</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="/client/dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/client/search.html">
+                            <i class="fas fa-search"></i>
+                            <span>Find Technicians</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/client/bookings.html">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>My Bookings</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/client/favorites.html">
+                            <i class="fas fa-heart"></i>
+                            <span>Favorites</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/client/payments.html">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Payments</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/client/notifications.html">
+                            <i class="fas fa-bell"></i>
+                            <span>Notifications</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/client/settings.html">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="/index.html" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1>Notifications</h1>
+                    <div class="breadcrumb">Home / Notifications</div>
+                </div>
+                <div class="header-right">
+                    <div class="search-icon" onclick="location.href='/client/search.html'">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    
+                </div>
+            </header>
+    
+    <main class="notifications-page">
+        <div class="page-header">
+            <h1>Notifications</h1>
+            <div class="page-actions">
+                <select id="globalFilter" onchange="filterAllNotifications()">
+                    <option value="all">All Notifications</option>
+                    <option value="unread">Unread Only</option>
+                    <option value="read">Read Only</option>
+                </select>
+                <button class="btn-mark-all" onclick="markAllAsRead()">
+                    <i class="fas fa-check-double"></i> Mark All as Read
+                </button>
+            </div>
+        </div>
+        
+        <div class="notifications-container" id="allNotifications">
+            <!-- Notifications will be loaded here -->
+        </div>
+    </main>
+    
+    
+    <script src="js/notifications.js"></script>
+    
+</body>
+</html>
