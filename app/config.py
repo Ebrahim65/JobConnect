@@ -27,7 +27,7 @@ class Settings(BaseSettings):
         env_file = ".env"
         extra = "ignore"
 
-upload_dir = "uploads"  # Or your preferred upload directory
+upload_dir = "uploads"
 allowed_profile_picture_types = ["image/jpeg", "image/png", "image/gif"]
 
 settings = Settings()
