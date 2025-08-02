@@ -34,7 +34,6 @@ async def get_current_client(
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
 
-    # ✅ Ensure you are returning a proper dict with expected types
     return {
         "client_id": str(client["client_id"]),
         "name": client["name"],
@@ -157,7 +156,7 @@ async def cancel_confirmed_booking(
     if current_user["type"] != "client":
         raise HTTPException(status_code=403, detail="Only clients can cancel bookings")
 
-    # Verify the booking belongs to this technician and is in confirmed status
+    # Verify the booking belongs to technician and is in confirmed status
     booking = await conn.fetchrow(
         """
         SELECT * FROM booking 
@@ -198,7 +197,7 @@ async def cancel_confirmed_booking(
         f"Your {booking['service_type']} booking has been cancelled by the client"
     )
 
-    # Optionally: Send email notification to client
+    # Send email notification to client
     client_email = await conn.fetchval(
         "SELECT email FROM client WHERE client_id = $1",
         booking["client_id"]
@@ -207,7 +206,7 @@ async def cancel_confirmed_booking(
     '''if client_email:
         send_email(
             to_email=client_email,
-            subject="⚠️ Booking Cancellation",
+            subject="Booking Cancellation",
             body=f"Your {booking['service_type']} booking has been cancelled by the technician."
         )'''
 
