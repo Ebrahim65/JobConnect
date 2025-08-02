@@ -6,7 +6,6 @@ from uuid import UUID
 import asyncpg
 import logging
 
-#import pdfkit
 from xhtml2pdf import pisa
 from io import BytesIO
 from ..database import get_db
